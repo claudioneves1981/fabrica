@@ -82,37 +82,38 @@ public class FabricaApplication {
 				   novaOrdem();
 			   } else if (newopcao == 2) {
 				   menuPrincipal();
+			   }else {
+				   System.out.print("Opcao invalida tente novamente");
 			   }
-			   System.out.print("Opcao invalida tente novamente");
 		   }while(newopcao > 2);
 	}
 
-	public static void listarOrdens(){
+	public static void listarOrdens() throws IOException {
 
-		OrdemProducaoService ordemProducaoService = new OrdemProducaoService();
-		List<OrdemProducao> ordensProducao;
 		JsonService jsonService = new JsonService();
-		ordensProducao = jsonService.ordens();
-		System.out.println(ordensProducao);
+		jsonService.ordens();
+		menuPrincipal();
 	}
 
 	public static void atualizarOrdens() throws IOException {
 		System.out.println("Digite a ordem a ser atualizada -->");
 		Scanner scanner = new Scanner(System.in);
 		Long ordem = scanner.nextLong();
+		JsonService jsonService = new JsonService();
 		OrdemProducao ordemProducao = jsonService.findByOrdem(ordem);
-		System.out.println(ordemProducao);
 		System.out.println("Concluida? 1-Sim, 2-Não");
 		System.out.print("-->");
 		int opcao;
 		do{
 			opcao = scanner.nextInt();
 			if(opcao == 1){
-				ordemProducao.setStatus("Concluida");
-				jsonService.atualizarOrdem(ordemProducao,ordem);
+				jsonService.atualizarOrdem(ordemProducao,ordem,"Concluida");
+				jsonService.findByOrdem(ordem);
+				menuPrincipal();
 			}else if(opcao == 2){
-				ordemProducao.setStatus("Andamento");
-				jsonService.atualizarOrdem(ordemProducao,ordem);
+				jsonService.atualizarOrdem(ordemProducao,ordem, "Andamento");
+				jsonService.findByOrdem(ordem);
+				menuPrincipal();
 			}else{
 				System.out.println("Opcao Invalida");
 			}
@@ -131,12 +132,10 @@ public class FabricaApplication {
 		do{
 			opcao = scanner.nextInt();
 			if(opcao == 1){
-				List<OrdemProducao> ordensProducao = jsonService.findByStatus("Andamento");
-				System.out.println(ordensProducao);
+				jsonService.findByStatus("Andamento");
 				relatorios();
 			}else if(opcao == 2){
-				List<OrdemProducao> ordensProducao = jsonService.findByStatus("Concluido");
-				System.out.println(ordensProducao);
+				jsonService.findByStatus("Concluida");
 				relatorios();
 			}else if(opcao == 0){
 				menuPrincipal();
