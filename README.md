@@ -1,6 +1,6 @@
 Para clonar o projeto(com GitHub Cli)
 ```
-gh repo clone claudioneves1981/cadastro
+gh repo clone claudioneves1981/fabrica
 ```
 Para executar o projeto no terminal, digite o seguinte comando:
 
