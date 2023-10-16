@@ -10,14 +10,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 @SpringBootApplication
 public class FabricaApplication {
-
-	@Autowired
-	private static JsonService jsonService;
 
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(FabricaApplication.class, args);
@@ -25,44 +24,50 @@ public class FabricaApplication {
 	}
 
 	public static void menuPrincipal() throws IOException {
-		Scanner scanner = new Scanner(System.in);
-
-		int opcao;
-
-		do{
+			Scanner scanner = new Scanner(System.in);
+			String opcao;
 			System.out.println("--MENU FABRICA --");
 			System.out.println("1 Nova Ordem Produção");
 			System.out.println("2 Listar Todas as Ordens");
 			System.out.println("3 Atualizar Status");
 			System.out.println("4 Relatorios");
 			System.out.print("Digite uma opção -- >");
-			opcao = scanner.nextInt();
-			 if(opcao == 1){
-				 novaOrdem();
-			 }else if(opcao == 2){
-				 listarOrdens();
-			 }else if(opcao == 3){
-				atualizarOrdens();
-			 }else if(opcao == 4){
-				 relatorios();
-			 }
-		}while(opcao == 0 || opcao > 4);
-
+			opcao = scanner.nextLine();
+				if (Objects.equals(opcao, "1")) {
+					novaOrdem();
+				} else if (Objects.equals(opcao, "2")) {
+					listarOrdens();
+				} else if (Objects.equals(opcao, "3")) {
+					atualizarOrdens();
+				} else if (Objects.equals(opcao, "4")) {
+					relatorios();
+				}else {
+					menuPrincipal();
+				}
 	}
 
 	public static void novaOrdem() throws IOException {
 		Scanner scanner = new Scanner(System.in);
 		OrdemProducao ordemProducao = new OrdemProducao();
 		JsonService jsonService = new JsonService();
-		int opcao;
 		String dataentrega;
 		System.out.println("-- NOVA ORDEM --");
 		System.out.print("PRODUTO --> ");
 		String produto = scanner.nextLine();
-		System.out.println("QUANTIDADE --> ");
-		int quantidade = scanner.nextInt();
+		String quantidade;
+
+		    do {
+				System.out.print("QUANTIDADE --> ");
+				quantidade = scanner.next();
+				if (quantidade.matches("[0-9]+$")) {
+					ordemProducao.setQuantidade(Integer.parseInt(quantidade));
+				} else {
+					System.out.println("dados invalidos");
+				}
+			}while(!quantidade.matches("[0-9]+$"));
+
 			do {
-				System.out.println("DATA DE ENTREGA --> Formato dd/mm/aaaa");
+				System.out.print("DATA DE ENTREGA --> Formato dd/mm/aaaa --> ");
 				dataentrega = scanner.next();
 				if (ValidaData.isValidDate(dataentrega, true)) {
 					ordemProducao.setDataEntrega(dataentrega);
@@ -71,21 +76,22 @@ public class FabricaApplication {
 				}
 			}while(!ValidaData.isValidDate(dataentrega, true));
 			ordemProducao.setProduto(produto);
-			ordemProducao.setQuantidade(quantidade);
 			jsonService.createOrdem(ordemProducao);
-		   System.out.println("deseja salvar nova ordem? 1 Sim , 2 - Nao- Voltar ao menu principal");
-		   int newopcao;
+		   System.out.print("deseja salvar nova ordem? 1 Sim , 2 - Nao- Voltar ao menu principal");
+		   String newopcao;
 		   do {
 			   System.out.print("--> ");
-			   newopcao = scanner.nextInt();
-			   if (newopcao == 1) {
-				   novaOrdem();
-			   } else if (newopcao == 2) {
-				   menuPrincipal();
-			   }else {
-				   System.out.print("Opcao invalida tente novamente");
-			   }
-		   }while(newopcao > 2);
+
+				   newopcao = scanner.next();
+				   if (Objects.equals(newopcao, "1")) {
+					   novaOrdem();
+				   }else if (Objects.equals(newopcao, "2")) {
+					   menuPrincipal();
+				   }else{
+					   System.out.print("Opcao Invalida tente novamente");
+				   }
+
+		   }while(!Objects.equals(newopcao, "1") && !Objects.equals(newopcao, "2"));
 	}
 
 	public static void listarOrdens() throws IOException {
@@ -98,9 +104,15 @@ public class FabricaApplication {
 	public static void atualizarOrdens() throws IOException {
 		System.out.println("Digite a ordem a ser atualizada -->");
 		Scanner scanner = new Scanner(System.in);
-		Long ordem = scanner.nextLong();
 		JsonService jsonService = new JsonService();
-		OrdemProducao ordemProducao = jsonService.findByOrdem(ordem);
+		OrdemProducao ordemProducao = new OrdemProducao();
+		Long ordem = 0L;
+		try {
+			ordem = scanner.nextLong();
+			ordemProducao = jsonService.findByOrdem(ordem);
+		}catch(InputMismatchException e){
+			atualizarOrdens();
+		}
 		System.out.println("Concluida? 1-Sim, 2-Não");
 		System.out.print("-->");
 		int opcao;
@@ -124,26 +136,23 @@ public class FabricaApplication {
 		Scanner scanner = new Scanner(System.in);
 		OrdemProducaoService ordemProducaoService = new OrdemProducaoService();
         JsonService jsonService = new JsonService();
-		System.out.print("RELATORIOS");
+		System.out.println("RELATORIOS");
 		System.out.println("1 - Andamento");
 		System.out.println("2 - Concluido");
 		System.out.println("0 - Menu Principal");
-		int opcao;
-		do{
-			opcao = scanner.nextInt();
-			if(opcao == 1){
+			String opcao = scanner.nextLine();
+			if(Objects.equals(opcao, "1")){
 				jsonService.findByStatus("Andamento");
 				relatorios();
-			}else if(opcao == 2){
+			}else if(Objects.equals(opcao, "2")){
 				jsonService.findByStatus("Concluida");
 				relatorios();
-			}else if(opcao == 0){
+			}else if(Objects.equals(opcao, "0")){
 				menuPrincipal();
-			}
+			}else{
 			System.out.println("Opcao Invalida");
-		}while(opcao > 2);
-
-
+			relatorios();
+			}
 	}
 
 }
