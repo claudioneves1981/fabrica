@@ -4,14 +4,11 @@ import com.example.fabrica.models.OrdemProducao;
 import com.example.fabrica.services.JsonService;
 import com.example.fabrica.services.OrdemProducaoService;
 import com.example.fabrica.utils.ValidaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 import java.io.IOException;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
